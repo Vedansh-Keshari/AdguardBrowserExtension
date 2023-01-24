@@ -86,7 +86,6 @@ export class PagesApi {
     }
 
     public static async openFilteringLogPage(): Promise<void> {
-        console.log(1);
         const activeTab = await TabsApi.getActive();
 
         if (!activeTab) {
