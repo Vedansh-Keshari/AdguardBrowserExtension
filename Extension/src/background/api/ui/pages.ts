@@ -86,19 +86,28 @@ export class PagesApi {
     }
 
     public static async openFilteringLogPage(): Promise<void> {
+        console.log(1);
         const activeTab = await TabsApi.getActive();
 
         if (!activeTab) {
             return;
         }
 
-        const url = PagesApi.filteringLogUrl + (activeTab.id ? `#${activeTab.id}` : '');
+        const baseUrl = PagesApi.filteringLogUrl;
+        const queryString = activeTab.id ? `#${activeTab.id}` : '';
+        const fullUrl = baseUrl + queryString;
+
+        const tab = await TabsApi.findOne({ url: `${baseUrl}*` });
+
+        if (tab) {
+            browser.tabs.update(tab.id, { url: fullUrl });
+            await TabsApi.focus(tab);
+            return;
+        }
 
         const windowStateString = await storage.get(FILTERING_LOG_WINDOW_STATE) as string | undefined;
-
-        await TabsApi.openWindow({
-            focusIfOpen: true,
-            url,
+        await browser.windows.create({
+            url: fullUrl,
             type: 'popup',
             ...(windowStateString ? JSON.parse(windowStateString) : PagesApi.defaultFilteringLogWindowState),
         });
