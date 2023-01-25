@@ -150,6 +150,7 @@ export class PagesApi {
         const tab = await TabsApi.findOne({ url: `${PagesApi.filteringLogUrl}*` });
 
         if (tab) {
+            await browser.tabs.update(tab.id, { url });
             await TabsApi.focus(tab);
             return;
         }
