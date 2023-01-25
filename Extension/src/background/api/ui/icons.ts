@@ -23,7 +23,22 @@ import { getIconImageData } from '../extension';
 import { FrameData } from './frames';
 import { notificationApi } from './notification';
 
+/**
+ * The Icons API is responsible for setting the icon that corresponds
+ * to the current state of the background extension in the specified tab.
+ */
 export class IconsApi {
+    /**
+     * Updates current extension icon for specified tab.
+     *
+     * @param tabId Tab's id.
+     * @param param1 The information from {@link FrameData} is needed
+     * to estimate the current status of the background extension
+     * in the specified tab.
+     * @param param1.documentAllowlisted Is website allowlisted.
+     * @param param1.applicationFilteringDisabled Is app filtering disabled globally.
+     * @param param1.totalBlockedTab Number of blocked requests.
+     */
     static async updateTabIcon(
         tabId: number,
         {

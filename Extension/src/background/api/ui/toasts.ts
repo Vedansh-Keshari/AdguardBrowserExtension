@@ -37,13 +37,19 @@ enum StylesAssetsPath {
     UpdateContainer = '/assets/css/update-container.css',
 }
 
+/**
+ * Toasts class handles work with different popups and alert messages.
+ */
 export class Toasts {
-    private static maxTries = 500; // 2500 sec
+    private static readonly maxTries = 500; // 2500 sec
 
-    private static triesTimeout = 5000; // 5 sec
+    private static readonly triesTimeout = 5000; // 5 sec
 
     private styles: Map<StylesAssetsPath, string | undefined> = new Map();
 
+    /**
+     * Downloads styles assets from {@link StylesAssetsPath}.
+     */
     public async init(): Promise<void> {
         const tasks = Object.values(StylesAssetsPath)
             .map(async (path) => {
@@ -56,6 +62,14 @@ export class Toasts {
         await Promise.all(tasks);
     }
 
+    /**
+     * Shows alert message.
+     *
+     * @param title Title.
+     * @param text Text.
+     * @param triesCount Number of tries to show. If this value exceeds {@link Toasts#maxTries}
+     * then the window will not be displayed.
+     */
     public async showAlertMessage(title: string, text: string | string[], triesCount = 1): Promise<void> {
         try {
             if (triesCount > Toasts.maxTries) {
@@ -92,12 +106,23 @@ export class Toasts {
         }
     }
 
+    /**
+     * Show message about enabled filters.
+     *
+     * @param filters Enabled filters.
+     */
     public showFiltersEnabledAlertMessage(filters: FilterMetadata[]): void {
         const { title, text } = Toasts.getFiltersEnabledResultMessage(filters);
 
         this.showAlertMessage(title, text);
     }
 
+    /**
+     * Show message about result of updating filters.
+     *
+     * @param success Whether the update was successful or not.
+     * @param filters List of filters to update.
+     */
     public showFiltersUpdatedAlertMessage(success: boolean, filters?: FilterMetadata[]): void {
         const { title, text } = Toasts.getFiltersUpdateResultMessage(success, filters);
 
@@ -105,7 +130,7 @@ export class Toasts {
     }
 
     /**
-     * Shows application updated popup
+     * Shows application updated popup.
      *
      * @param currentVersion -  app current semver string
      * @param previousVersion -  app previous semver string
@@ -201,6 +226,13 @@ export class Toasts {
         }
     }
 
+    /**
+     * Returns message with enabled filters.
+     *
+     * @param enabledFilters List of enabled filters.
+     *
+     * @returns Title and text lines for message.
+     */
     private static getFiltersEnabledResultMessage(enabledFilters: FilterMetadata[]): {
         title: string,
         text: string[],
@@ -217,6 +249,14 @@ export class Toasts {
         };
     }
 
+    /**
+     * Returns message with result of updating filters..
+     *
+     * @param success Whether the update was successful or not.
+     * @param updatedFilters List of filters to update.
+     *
+     * @returns Title and text lines for message.
+     */
     private static getFiltersUpdateResultMessage(
         success: boolean,
         updatedFilters?: FilterMetadata[],

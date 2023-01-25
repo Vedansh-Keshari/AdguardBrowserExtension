@@ -26,6 +26,10 @@ import { defaultSettings } from '../../../common/settings';
 import { storage } from '../../storages';
 import { RunInfo } from '../../utils';
 
+/**
+ * The Install API should set the base version of the schema and application,
+ * generate a client ID and set default values if the extension has been installed.
+ */
 export class InstallApi {
     /**
      * Generate client id

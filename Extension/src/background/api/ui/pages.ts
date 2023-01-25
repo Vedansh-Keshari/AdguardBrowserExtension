@@ -16,6 +16,7 @@
  * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
  */
 import browser, { Runtime, Windows } from 'webextension-polyfill';
+
 import { UserAgent } from '../../../common/user-agent';
 import { AddFilteringSubscriptionMessage, ScriptletCloseWindowMessage } from '../../../common/messages';
 import {
@@ -30,7 +31,6 @@ import { storage, settingsStorage } from '../../storages';
 import { SettingOption } from '../../schema';
 import { BrowserUtils } from '../../utils/browser-utils';
 import { AntiBannerFiltersId, FILTERING_LOG_WINDOW_STATE } from '../../../common/constants';
-
 import { TabsApi } from '../extension';
 import { Prefs } from '../../prefs';
 import {
@@ -40,32 +40,39 @@ import {
     OPTIONS_OUTPUT,
 } from '../../../../../constants';
 
+/**
+ * Pages API is needed to open pages of various extensions: settings,
+ * full-screen user rules editor, filter log, etc.
+ */
 export class PagesApi {
-    public static settingsUrl = PagesApi.getExtensionPageUrl(OPTIONS_OUTPUT);
+    public static readonly settingsUrl = PagesApi.getExtensionPageUrl(OPTIONS_OUTPUT);
 
-    public static filteringLogUrl = PagesApi.getExtensionPageUrl(FILTERING_LOG_OUTPUT);
+    public static readonly filteringLogUrl = PagesApi.getExtensionPageUrl(FILTERING_LOG_OUTPUT);
 
-    public static defaultFilteringLogWindowState: Windows.CreateCreateDataType = {
+    public static readonly defaultFilteringLogWindowState: Windows.CreateCreateDataType = {
         width: 1000,
         height: 650,
         top: 0,
         left: 0,
     };
 
-    public static filtersDownloadPageUrl = PagesApi.getExtensionPageUrl(FILTER_DOWNLOAD_OUTPUT);
+    public static readonly filtersDownloadPageUrl = PagesApi.getExtensionPageUrl(FILTER_DOWNLOAD_OUTPUT);
 
-    public static thankYouPageUrl = Forward.get({
+    public static readonly thankYouPageUrl = Forward.get({
         action: ForwardAction.ThankYou,
         from: ForwardFrom.Background,
     });
 
-    public static comparePageUrl = Forward.get({
+    public static readonly comparePageUrl = Forward.get({
         action: ForwardAction.Compare,
         from: ForwardFrom.Options,
     });
 
-    public static extensionStoreUrl = PagesApi.getExtensionStoreUrl();
+    public static readonly extensionStoreUrl = PagesApi.getExtensionStoreUrl();
 
+    /**
+     * Opens settings.
+     */
     public static async openSettingsPage(): Promise<void> {
         await TabsApi.openTab({
             focusIfOpen: true,
@@ -73,6 +80,9 @@ export class PagesApi {
         });
     }
 
+    /**
+     * Opens full-screen user rules editor.
+     */
     public static async openFullscreenUserRulesPage(): Promise<void> {
         const theme = settingsStorage.get(SettingOption.AppearanceTheme);
         const url = PagesApi.getExtensionPageUrl(FULLSCREEN_USER_RULES_OUTPUT, `?theme=${theme}`);
@@ -85,6 +95,9 @@ export class PagesApi {
         });
     }
 
+    /**
+     * Opens filtering log.
+     */
     public static async openFilteringLogPage(): Promise<void> {
         const activeTab = await TabsApi.getActive();
 
@@ -104,6 +117,12 @@ export class PagesApi {
         });
     }
 
+    /**
+     * Opens abuse page.
+     *
+     * @param siteUrl Site url.
+     * @param from {@link ForwardFrom} Token for creating abuse page url params.
+     */
     public static async openAbusePage(siteUrl: string, from: ForwardFrom): Promise<void> {
         let { browserName } = UserAgent;
         let browserDetails: string | undefined;
@@ -148,6 +167,12 @@ export class PagesApi {
         });
     }
 
+    /**
+     * Opens site report.
+     *
+     * @param siteUrl Site url.
+     * @param from {@link ForwardFrom} Token for creating report site url params.
+     */
     public static async openSiteReportPage(siteUrl: string, from: ForwardFrom): Promise<void> {
         const domain = UrlUtils.getDomainName(siteUrl);
 
@@ -166,6 +191,14 @@ export class PagesApi {
         });
     }
 
+    /**
+     * Returns requested filename with extension prefix url.
+     *
+     * @param filename Requested filename.
+     * @param optionalPart Optional part, for example, query.
+     *
+     * @returns Requested filename with base extension url.
+     */
     public static getExtensionPageUrl(filename: string, optionalPart?: string): string {
         let url = `${Prefs.baseUrl}${filename}.html`;
 
@@ -176,14 +209,23 @@ export class PagesApi {
         return url;
     }
 
+    /**
+     * Opens filters download page.
+     */
     public static async openFiltersDownloadPage(): Promise<void> {
         await TabsApi.openTab({ url: PagesApi.filtersDownloadPageUrl });
     }
 
+    /**
+     * Opens compare page.
+     */
     public static async openComparePage(): Promise<void> {
         await TabsApi.openTab({ url: PagesApi.comparePageUrl });
     }
 
+    /**
+     * Opens thank you page.
+     */
     public static async openThankYouPage(): Promise<void> {
         const params = BrowserUtils.getExtensionParams();
         params.push(`_locale=${encodeURIComponent(browser.i18n.getUILanguage())}`);
@@ -198,10 +240,19 @@ export class PagesApi {
         }
     }
 
+    /**
+     * Opens extensions store page.
+     */
     public static async openExtensionStorePage(): Promise<void> {
         await TabsApi.openTab({ url: PagesApi.extensionStoreUrl });
     }
 
+    /**
+     * Opens the settings page with a modal to add a custom filter.
+     *
+     * @param message {@link AddFilteringSubscriptionMessage} Contains
+     * url and title of the custom filter.
+     */
     public static async openSettingsPageWithCustomFilterModal(message: AddFilteringSubscriptionMessage): Promise<void> {
         const { url, title } = message.data;
 
@@ -219,6 +270,12 @@ export class PagesApi {
         });
     }
 
+    /**
+     * Closes tab with provided id.
+     *
+     * @param message Unused message.
+     * @param sender {@link Runtime.MessageSender} Which contains tab id to close.
+     */
     public static async closePage(
         message: ScriptletCloseWindowMessage,
         sender: Runtime.MessageSender,
@@ -230,6 +287,11 @@ export class PagesApi {
         }
     }
 
+    /**
+     * Returns extension store url.
+     *
+     * @returns Extension store url.
+     */
     private static getExtensionStoreUrl(): string {
         let action = ForwardAction.ChromeStore;
 
@@ -247,11 +309,23 @@ export class PagesApi {
         });
     }
 
+    /**
+     * Returns the query parameters for the browser security settings value.
+     *
+     * @returns The query parameters for the browser security settings value.
+     */
     private static getBrowserSecurityParams(): { [key: string]: string } {
         const isEnabled = !settingsStorage.get(SettingOption.DisableSafebrowsing);
         return { 'browsing_security.enabled': String(isEnabled) };
     }
 
+    /**
+     * Returns the query parameters for the Stealth mode options.
+     *
+     * @param filterIds Current enabled filters ids.
+     *
+     * @returns The query parameters for the Stealth mode options.
+     */
     private static getStealthParams(filterIds: number[]): { [key: string]: string } {
         const stealthEnabled = !settingsStorage.get(SettingOption.DisableStealthMode);
 
@@ -314,8 +388,9 @@ export class PagesApi {
             stealthOptionsEntries.push([queryKey, option]);
         });
 
+        // TODO: Check, maybe obsoleted because we don't have option 'strip url'
+        // in the Stealth Mode options.
         const isRemoveUrlParamsEnabled = filterIds.includes(AntiBannerFiltersId.UrlTrackingFilterId);
-
         if (isRemoveUrlParamsEnabled) {
             stealthOptionsEntries.push(['stealth.strip_url', 'true']);
         }

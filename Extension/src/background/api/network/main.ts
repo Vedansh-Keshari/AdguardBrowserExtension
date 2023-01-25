@@ -128,7 +128,7 @@ export class Network {
      *
      * @throws Error if metadata is invalid
      *
-     * @returns @see {@link Metadata}
+     * @returns Object of {@link Metadata}
      */
     public async getLocalFiltersMetadata(): Promise<Metadata> {
         const url = browser.runtime.getURL(`${this.settings.localFiltersFolder}/filters.json`);
@@ -161,7 +161,7 @@ export class Network {
      *
      * @throws Error if metadata is invalid
      *
-     * @returns @see {@link I18nMetadata}
+     * @returns Object of {@link I18nMetadata}
      */
     public async getLocalFiltersI18nMetadata(): Promise<I18nMetadata> {
         const url = browser.runtime.getURL(`${this.settings.localFiltersFolder}/filters_i18n.json`);
@@ -246,7 +246,7 @@ export class Network {
      *
      * @throws Error if metadata is invalid
      *
-     * @returns @see {@link I18nMetadata}
+     * @returns Object of {@link I18nMetadata}
      */
     public async downloadI18nMetadataFromBackend(): Promise<I18nMetadata> {
         const response = await Network.executeRequestAsync(
@@ -377,6 +377,16 @@ export class Network {
         });
     }
 
+    /**
+     * Creates a custom network error to throw it to a higher level.
+     *
+     * @param message Error message.
+     * @param url Url where the error occurred.
+     * @param response Network response information {@link ExtensionXMLHttpRequest}.
+     * @param originError Original error.
+     *
+     * @returns Error "wrapper".
+     */
     private static createError(
         message: string,
         url: string,
