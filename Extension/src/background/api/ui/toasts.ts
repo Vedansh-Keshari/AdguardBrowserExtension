@@ -132,9 +132,9 @@ export class Toasts {
     /**
      * Shows application updated popup.
      *
-     * @param currentVersion -  app current semver string
-     * @param previousVersion -  app previous semver string
-     * @param triesCount - count of show popup tries
+     * @param currentVersion App current semver string.
+     * @param previousVersion App previous semver string.
+     * @param triesCount Count of show popup tries.
      */
     public async showApplicationUpdatedPopup(
         currentVersion: string,
@@ -303,12 +303,12 @@ export class Toasts {
     }
 
     /**
-     * Depending on version numbers select proper message for description
+     * Depending on version numbers select proper message for description.
      *
-     * @param currentVersion - current semver of app
-     * @param previousVersion - previous semver of app
+     * @param currentVersion Current semver of app.
+     * @param previousVersion Previous semver of app.
      *
-     * @returns message text
+     * @returns Message text.
      */
     private static getUpdateDescriptionMessage(currentVersion: string, previousVersion: string): string {
         if ((

@@ -19,7 +19,7 @@ import { UserAgent } from '../../../common/user-agent';
 import { BrowserUtils } from '../../utils/browser-utils';
 
 /**
- * NetworkSettings contains a bunch of url's which are using by extension,
+ * NetworkSettings contains a bunch of url's which are using by extension.
  */
 export class NetworkSettings {
     // Base url of our backend server
@@ -59,7 +59,7 @@ export class NetworkSettings {
     }
 
     /**
-     * Returns URL for downloading AG filters
+     * Returns URL for downloading AG filters.
      *
      * @returns URL for downloading AG filters.
      */
@@ -68,7 +68,7 @@ export class NetworkSettings {
     }
 
     /**
-     * Returns URL for downloading optimized AG filters
+     * Returns URL for downloading optimized AG filters.
      *
      * @returns URL for downloading optimized AG filters.
      */
@@ -77,7 +77,7 @@ export class NetworkSettings {
     }
 
     /**
-     * Returns URL for checking filter updates
+     * Returns URL for checking filter updates.
      *
      * @returns URL for checking filter updates.
      */
@@ -87,7 +87,7 @@ export class NetworkSettings {
     }
 
     /**
-     * Returns URL for downloading i18n localizations
+     * Returns URL for downloading i18n localizations.
      *
      * @returns URL for downloading i18n localizations.
      */
@@ -97,7 +97,7 @@ export class NetworkSettings {
     }
 
     /**
-     * Returns URL for user complaints on missed ads or malware/phishing websites
+     * Returns URL for user complaints on missed ads or malware/phishing websites.
      *
      * @returns URL for user complaints on missed ads or malware/phishing websites.
      */
@@ -108,11 +108,10 @@ export class NetworkSettings {
     /**
      * URL for collecting filter rules statistics.
      * We do not collect it by default, unless user is willing to help.
-     *
      * Filter rules stats are covered in our privacy policy and on also here:
-     * http://adguard.com/en/filter-rules-statistics.html
+     * http://adguard.com/en/filter-rules-statistics.html.
      *
-     * @returns rule stats url
+     * @returns Rule stats url.
      */
     get ruleStatsUrl(): string {
         return `${this.backendUrl}/api/1.0/rulestats.html`;

@@ -96,10 +96,10 @@ export class SettingsApi {
     }
 
     /**
-     * Set setting to storage and publish setting event
+     * Set setting to storage and publish setting event.
      *
-     * @param key - setting option key
-     * @param value - settings option value
+     * @param key - Setting option key.
+     * @param value - Settings option value.
      */
     public static async setSetting<T extends SettingOption>(key: T, value: Settings[T]): Promise<void> {
         settingsStorage.set(key, value);
@@ -114,11 +114,11 @@ export class SettingsApi {
     }
 
     /**
-     * Get setting from setting storage
+     * Get setting from setting storage.
      *
-     * @param key - setting option key
+     * @param key - Setting option key.
      *
-     * @returns settings option value
+     * @returns Settings option value.
      */
     public static getSetting<T extends SettingOption>(key: T): Settings[T] {
         return settingsStorage.get(key);
@@ -475,8 +475,8 @@ export class SettingsApi {
         [StealthOption.StripTrackingParams]: stripTrackingParam,
     }: StealthConfig): Promise<void> {
         /**
-         * set "block webrtc" setting as soon as possible. AG-9980
-         * don't set the actual value to avoid requesting permissions
+         * Set "block webrtc" setting as soon as possible. AG-9980
+         * don't set the actual value to avoid requesting permissions.
          */
         if (settingsStorage.get(SettingOption.BlockWebRTC) !== blockWebRTC) {
             settingsStorage.set(SettingOption.BlockWebRTC, blockWebRTC);

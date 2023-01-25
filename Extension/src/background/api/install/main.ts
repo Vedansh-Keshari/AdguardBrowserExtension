@@ -32,9 +32,9 @@ import { RunInfo } from '../../utils';
  */
 export class InstallApi {
     /**
-     * Generate client id
+     * Generate client id.
      *
-     * @returns client id string
+     * @returns Client id string.
      */
     public static genClientId(): string {
         const suffix = (Date.now()) % 1e8;
@@ -42,11 +42,11 @@ export class InstallApi {
     }
 
     /**
-     * Initializes app install
+     * Initializes app install.
      *
-     * @param runInfo - info about extension start up
-     * @param runInfo.currentAppVersion - current extension version
-     * @param runInfo.currentSchemaVersion - current data schema version
+     * @param runInfo - Info about extension start up.
+     * @param runInfo.currentAppVersion - Current extension version.
+     * @param runInfo.currentSchemaVersion - Current data schema version.
      *
      */
     public static async install({ currentAppVersion, currentSchemaVersion }: RunInfo): Promise<void> {
