@@ -40,13 +40,30 @@ import {
     OPTIONS_OUTPUT,
 } from '../../../../../constants';
 
+/**
+ * Pages API provides methods for managing browser pages
+ */
+// TODO: We can manipulates tabs directly from content-script and other extension pages context.
+// So this API can be shared and used for data flow simplifying (direct calls instead message passing)
 export class PagesApi {
+    /**
+     * Settings page url.
+     */
     public static settingsUrl = PagesApi.getExtensionPageUrl(OPTIONS_OUTPUT);
 
+    /**
+     * Filtering log page url.
+     */
     public static filteringLogUrl = PagesApi.getExtensionPageUrl(FILTERING_LOG_OUTPUT);
 
+    /**
+     * Fullscreen user rule editor page url.
+     */
     public static fullscreenUserRulesPageUrl = PagesApi.getExtensionPageUrl(FULLSCREEN_USER_RULES_OUTPUT);
 
+    /**
+     * Default state of filtering log window.
+     */
     public static defaultFilteringLogWindowState: Windows.CreateCreateDataType = {
         width: 1000,
         height: 650,
@@ -54,20 +71,36 @@ export class PagesApi {
         left: 0,
     };
 
+    /**
+     * Filters download page url.
+     */
     public static filtersDownloadPageUrl = PagesApi.getExtensionPageUrl(FILTER_DOWNLOAD_OUTPUT);
 
+    /**
+     * Thank you page page url.
+     */
     public static thankYouPageUrl = Forward.get({
         action: ForwardAction.ThankYou,
         from: ForwardFrom.Background,
     });
 
+    /**
+     * Compare page url.
+     */
     public static comparePageUrl = Forward.get({
         action: ForwardAction.Compare,
         from: ForwardFrom.Options,
     });
 
+    /**
+     *  Extension browser store url.
+     */
     public static extensionStoreUrl = PagesApi.getExtensionStoreUrl();
 
+    /**
+     * Opens settings page tab.
+     * If the page has been already opened, focus on tab instead creating new one.
+     */
     public static async openSettingsPage(): Promise<void> {
         const tab = await TabsApi.findOne({ url: `${PagesApi.settingsUrl}*` });
 
@@ -79,6 +112,10 @@ export class PagesApi {
         await browser.tabs.create({ url: PagesApi.settingsUrl });
     }
 
+    /**
+     * Opens fullscreen user rules page window.
+     * If the page has been already opened, focus on window instead creating new one.
+     */
     public static async openFullscreenUserRulesPage(): Promise<void> {
         const theme = settingsStorage.get(SettingOption.AppearanceTheme);
         const url = `${PagesApi.fullscreenUserRulesPageUrl}?theme=${theme}`;
@@ -98,6 +135,10 @@ export class PagesApi {
         });
     }
 
+    /**
+     * Opens filtering log page window.
+     * If the page has been already opened, focus on window instead creating new one.
+     */
     public static async openFilteringLogPage(): Promise<void> {
         const activeTab = await TabsApi.getActive();
         if (!activeTab) {
@@ -122,6 +163,12 @@ export class PagesApi {
         });
     }
 
+    /**
+     * Opens abuse page tab.
+     *
+     * @param siteUrl Target site url.
+     * @param from UI which user is forwarded from.
+     */
     public static async openAbusePage(siteUrl: string, from: ForwardFrom): Promise<void> {
         let { browserName } = UserAgent;
         let browserDetails: string | undefined;
@@ -164,6 +211,12 @@ export class PagesApi {
         await browser.tabs.create({ url: reportUrl });
     }
 
+    /**
+     * Opens site report page.
+     *
+     * @param siteUrl Target site url.
+     * @param from UI which user is forwarded from.
+     */
     public static async openSiteReportPage(siteUrl: string, from: ForwardFrom): Promise<void> {
         const domain = UrlUtils.getDomainName(siteUrl);
 
@@ -182,6 +235,13 @@ export class PagesApi {
         });
     }
 
+    /**
+     * Create full extension page url, based on precomputed values from webextension API.
+     *
+     * @param filename Page html filename.
+     * @param optionalPart Url query string or/and hash.
+     * @returns Full extension page url.
+     */
     public static getExtensionPageUrl(filename: string, optionalPart?: string): string {
         let url = `${Prefs.baseUrl}${filename}.html`;
 
@@ -192,14 +252,23 @@ export class PagesApi {
         return url;
     }
 
+    /**
+     * Opens filters download page.
+     */
     public static async openFiltersDownloadPage(): Promise<void> {
         await browser.tabs.create({ url: PagesApi.filtersDownloadPageUrl });
     }
 
+    /**
+     * Opens compare page.
+     */
     public static async openComparePage(): Promise<void> {
         await browser.tabs.create({ url: PagesApi.comparePageUrl });
     }
 
+    /**
+     * Opens thank you page.
+     */
     public static async openThankYouPage(): Promise<void> {
         const params = BrowserUtils.getExtensionParams();
         params.push(`_locale=${encodeURIComponent(browser.i18n.getUILanguage())}`);
@@ -214,10 +283,19 @@ export class PagesApi {
         }
     }
 
+    /**
+     * Opens extension store page.
+     */
     public static async openExtensionStorePage(): Promise<void> {
         await browser.tabs.create({ url: PagesApi.extensionStoreUrl });
     }
 
+    /**
+     * Opens 'Add custom filter' modal window into settings page.
+     * If the page has been already opened, reload it with new custom filter query params, passed from content script.
+     *
+     * @param message - content script message with custom filter data.
+     */
     public static async openSettingsPageWithCustomFilterModal(message: AddFilteringSubscriptionMessage): Promise<void> {
         const { url, title } = message.data;
 
@@ -233,7 +311,8 @@ export class PagesApi {
 
         if (tab) {
             await browser.tabs.update(tab.id, { url: path });
-            // reload option page for force modal window rerender
+            // Reload option page for force modal window rerender
+            // TODO: track url update in frontend and remove force reloading via webextension API
             await browser.tabs.reload(tab.id);
             await TabsApi.focus(tab);
             return;
@@ -242,6 +321,12 @@ export class PagesApi {
         await browser.tabs.create({ url: path });
     }
 
+    /**
+     * Closes page with {@link Runtime.MessageSender} tab id.
+     *
+     * @param message - content script message with custom filter data.
+     * @param sender - {@link Runtime.MessageSender}
+     */
     public static async closePage(
         message: ScriptletCloseWindowMessage,
         sender: Runtime.MessageSender,
@@ -253,6 +338,11 @@ export class PagesApi {
         }
     }
 
+    /**
+     * Gets extension store url based on UA data.
+     *
+     * @returns Extension store url.
+     */
     private static getExtensionStoreUrl(): string {
         let action = ForwardAction.ChromeStore;
 
@@ -270,11 +360,22 @@ export class PagesApi {
         });
     }
 
+    /**
+     * Gets browser security url params.
+     *
+     * @returns Browser security url params record.
+     */
     private static getBrowserSecurityParams(): { [key: string]: string } {
         const isEnabled = !settingsStorage.get(SettingOption.DisableSafebrowsing);
         return { 'browsing_security.enabled': String(isEnabled) };
     }
 
+    /**
+     * Gets stealth url params.
+     *
+     * @param filterIds List of filters id.
+     * @returns Stealth url params record.
+     */
     private static getStealthParams(filterIds: number[]): { [key: string]: string } {
         const stealthEnabled = !settingsStorage.get(SettingOption.DisableStealthMode);
 
