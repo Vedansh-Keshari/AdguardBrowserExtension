@@ -69,10 +69,14 @@ export class PagesApi {
     public static extensionStoreUrl = PagesApi.getExtensionStoreUrl();
 
     public static async openSettingsPage(): Promise<void> {
-        await TabsApi.openTab({
-            focusIfOpen: true,
-            url: PagesApi.settingsUrl,
-        });
+        const tab = await TabsApi.findOne({ url: `${PagesApi.settingsUrl}*` });
+
+        if (tab) {
+            await TabsApi.focus(tab);
+            return;
+        }
+
+        await browser.tabs.create({ url: PagesApi.settingsUrl });
     }
 
     public static async openFullscreenUserRulesPage(): Promise<void> {
@@ -82,7 +86,6 @@ export class PagesApi {
         const tab = await TabsApi.findOne({ url: `${PagesApi.fullscreenUserRulesPageUrl}*` });
 
         if (tab) {
-            browser.tabs.update(tab.id, { url });
             await TabsApi.focus(tab);
             return;
         }
@@ -106,7 +109,6 @@ export class PagesApi {
         const tab = await TabsApi.findOne({ url: `${PagesApi.filteringLogUrl}*` });
 
         if (tab) {
-            browser.tabs.update(tab.id, { url });
             await TabsApi.focus(tab);
             return;
         }
@@ -159,9 +161,7 @@ export class PagesApi {
 
         const reportUrl = Forward.get(params);
 
-        await TabsApi.openTab({
-            url: reportUrl,
-        });
+        await browser.tabs.create({ url: reportUrl });
     }
 
     public static async openSiteReportPage(siteUrl: string, from: ForwardFrom): Promise<void> {
@@ -173,7 +173,7 @@ export class PagesApi {
 
         const punycodeDomain = UrlUtils.toPunyCode(domain);
 
-        await TabsApi.openTab({
+        await browser.tabs.create({
             url: Forward.get({
                 from,
                 action: ForwardAction.SiteReport,
@@ -193,11 +193,11 @@ export class PagesApi {
     }
 
     public static async openFiltersDownloadPage(): Promise<void> {
-        await TabsApi.openTab({ url: PagesApi.filtersDownloadPageUrl });
+        await browser.tabs.create({ url: PagesApi.filtersDownloadPageUrl });
     }
 
     public static async openComparePage(): Promise<void> {
-        await TabsApi.openTab({ url: PagesApi.comparePageUrl });
+        await browser.tabs.create({ url: PagesApi.comparePageUrl });
     }
 
     public static async openThankYouPage(): Promise<void> {
@@ -215,7 +215,7 @@ export class PagesApi {
     }
 
     public static async openExtensionStorePage(): Promise<void> {
-        await TabsApi.openTab({ url: PagesApi.extensionStoreUrl });
+        await browser.tabs.create({ url: PagesApi.extensionStoreUrl });
     }
 
     public static async openSettingsPageWithCustomFilterModal(message: AddFilteringSubscriptionMessage): Promise<void> {
@@ -229,10 +229,17 @@ export class PagesApi {
 
         const path = PagesApi.getExtensionPageUrl(OPTIONS_OUTPUT, optionalPart);
 
-        await TabsApi.openTab({
-            focusIfOpen: true,
-            url: path,
-        });
+        const tab = await TabsApi.findOne({ url: `${PagesApi.settingsUrl}*` });
+
+        if (tab) {
+            await browser.tabs.update(tab.id, { url: path });
+            // reload option page for force modal window rerender
+            await browser.tabs.reload(tab.id);
+            await TabsApi.focus(tab);
+            return;
+        }
+
+        await browser.tabs.create({ url: path });
     }
 
     public static async closePage(
